@@ -73,7 +73,7 @@ namespace Sammy\Packs\Samils\ApplicationServer {
      */
     private $public;
 
-    public final function serve (Dir $dir) {
+    public function serve (Dir $dir) {
       /**
        * @var requestFileName
        * - The requested file name

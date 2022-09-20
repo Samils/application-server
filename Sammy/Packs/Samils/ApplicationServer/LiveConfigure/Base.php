@@ -63,7 +63,7 @@ namespace Sammy\Packs\Samils\ApplicationServer\LiveConfigure {
      * get the application configures map
      * from liveConfigure.
      */
-    public static final function BaseMap () {
+    public static function BaseMap () {
       return self::$BaseMap;
     }
 
@@ -72,7 +72,7 @@ namespace Sammy\Packs\Samils\ApplicationServer\LiveConfigure {
      * get the application configures map
      * from liveConfigure.
      */
-    public static final function Map () {
+    public static function Map () {
       return self::BaseMap ();
     }
   }}

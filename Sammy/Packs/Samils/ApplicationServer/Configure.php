@@ -164,7 +164,7 @@ namespace Sammy\Packs\Samils\ApplicationServer {
       $confDatas = ApplicationServerHelpers::conf ();
 
       $viewEngineManager = isset ($confDatas ['view engine manager']) ? (
-        $confDatas['view engine manager']
+        $confDatas ['view engine manager']
       ) : '\\php\\view';
 
       $viewEngineScripts = isset($confDatas['view engine scripts']) ? (

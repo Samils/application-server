@@ -62,19 +62,22 @@ namespace Sammy\Packs\Samils\ApplicationServer\Configure {
      * [ConfigureApplicationPaths description]
      * @param array $confs [description]
      */
-    protected static final function ConfigureApplicationPaths ($confs) {
-      if (!(is_array($confs) && isset($confs['application_server_paths'])))
+    protected static function ConfigureApplicationPaths ($confs) {
+      if (!(is_array ($confs) && isset ($confs ['application_server_paths']))) {
         return;
+      }
 
-      $paths = $confs[ 'application_server_paths' ];
+      $pathAliases = $confs ['application_server_paths'];
 
-      $format = requires ('format');
+      if (is_array ($pathAliases)) {
+        $path = requires ('path');
 
-      foreach ($paths as $path => $source) {
-        $source_core = $format->concat ($source);
+        foreach ($pathAliases as $pathAlias => $source) {
+          $pathSourceAbsolutePath = $path->join ($source);
 
-        if (is_dir ($source_core)) {
-          phpmodule::DefinePath ($path, $source_core);
+          if (is_dir ($pathSourceAbsolutePath)) {
+            phpmodule::DefinePath ($pathAlias, $pathSourceAbsolutePath);
+          }
         }
       }
     }
