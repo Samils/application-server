@@ -92,7 +92,7 @@ namespace Sammy\Packs\Samils\ApplicationServer {
 
       $staticFilePath = $this->getStaticFilePath ($requestFileName);
 
-      if (is_file ($staticFilePath)) {
+      if (!is_null ($staticFilePath)) {
         $staticFileExtension = pathinfo ($staticFilePath, 4);
         $this->byFileType ($staticFilePath, $staticFileExtension);
       }
@@ -136,13 +136,13 @@ namespace Sammy\Packs\Samils\ApplicationServer {
       ];
 
       foreach ($requestFileNameAlternatePaths as $requestFileNameAlternatePath) {
-        if ($dir->contains ($requestFileNameAlternatePath)) {
+        if ($dir->contains ($requestFileNameAlternatePath) && is_file ($dir->abs ($requestFileNameAlternatePath))) {
           return $dir->abs ($requestFileNameAlternatePath);
-        } elseif (@preg_match ($applicationAssestsPathRe, $requestFileNameAlternatePath, $match)) {
+        } elseif (@preg_match ($applicationAssestsPathRe, $requestFileNameAlternatePath, $match) && false) {
           $assets = new Dir (ApplicationServerHelpers::AssetsDir ());
           $filePath = isset ($match [1]) ? $match [1] : $match [0];
 
-          if ($assets->contains ($filePath)) {
+          if ($assets->contains ($filePath) && is_file ($assets->abs ($filePath))) {
             return $assets->abs ($filePath);
           }
         }
