@@ -31,23 +31,26 @@
  * SOFTWARE.
  */
 namespace Sammy\Packs\Samils\ApplicationServer {
-  use FileSystem\Folder as Dir;
+  use Closure;
   use Configure as Conf;
   use php\module as phpmodule;
+  use FileSystem\Folder as Dir;
   use Samils\Handler\HandleOutPut;
+  use Sammy\Packs\Sami\RouteDatas;
+  use Sammy\Packs\Samils\ApplicationStorage;
   use Sammy\Packs\Samils\ApplicationServerHelpers;
   /**
-   * Make sure the module base internal class is not
+   * Make sure the module base internal trait is not
    * declared in the php global scope defore creating
    * it.
    * It ensures that the script flux is not interrupted
    * when trying to run the current command by the cli
    * API.
    */
-  if (!class_exists ('Sammy\Packs\Samils\ApplicationServer\Base')) {
+  if (!trait_exists ('Sammy\Packs\Samils\ApplicationServer\Base')) {
   /**
-   * @class Base
-   * Base internal class for the
+   * @trait Base
+   * Base internal trait for the
    *\Samils\ApplicationServer module.
    * -
    * This is (in the ils environment)
@@ -61,7 +64,7 @@ namespace Sammy\Packs\Samils\ApplicationServer {
    * and boot it by using the ils directory boot.
    * -
    */
-  class Base {
+  trait Base {
     use FileType;
     use Configure;
 
@@ -74,41 +77,24 @@ namespace Sammy\Packs\Samils\ApplicationServer {
     private $public;
 
     public function serve (Dir $dir) {
+      if (!isset ($_SERVER ['REQUEST_URI'])) {
+        return 0;
+      }
+
+      ApplicationStorage::on ('ShutDown', $this->getShutDownHandler ());
+
       /**
        * @var requestFileName
        * - The requested file name
        * - ?inside the public directory
        */
-      $requestFileName = null;
+      $requestFileName = $_SERVER ['REQUEST_URI'];
 
-      if (isset ($_SERVER ['REQUEST_URI'])) {
-        $requestFileName = $_SERVER ['REQUEST_URI'];
-      }
+      $staticFilePath = $this->getStaticFilePath ($requestFileName);
 
-      $requestFileName = (preg_replace ('/^(\.*(\\\|\/)*)+/', '',
-        $requestFileName
-      ));
-
-      $aap = preg_replace ('/^(\/|\\\)+/', '', preg_replace ('/(\/|\\\)+$/', '',
-        HandleOutPut::path2re (ApplicationServerHelpers::AssetsPath ())
-      ));
-
-      $aapRe = '/^\/?'.$aap.'\/(.*)$/i';
-
-      if ($dir->contains ($requestFileName)) {
-        $this->byFileType (
-          $dir->abs($requestFileName),
-          pathinfo ( $requestFileName, PATHINFO_EXTENSION )
-        );
-      } elseif (@preg_match ($aapRe, $requestFileName, $match)) {
-        $assets = new Dir (ApplicationServerHelpers::AssetsDir ());
-        $filePath = isset ($match [1]) ? $match [1] : $match [0];
-
-        if ($assets->contains ($filePath)) {
-          $this->byFileType ($assets->abs ($filePath),
-            pathinfo ($filePath, PATHINFO_EXTENSION)
-          );
-        }
+      if (is_file ($staticFilePath)) {
+        $staticFileExtension = pathinfo ($staticFilePath, 4);
+        $this->byFileType ($staticFilePath, $staticFileExtension);
       }
     }
 
@@ -116,6 +102,67 @@ namespace Sammy\Packs\Samils\ApplicationServer {
       if (is_string ($dir) && is_dir($dir)) {
         $this->public = $dir;
       }
+    }
+
+    public function getStaticFilePath ($requestFileName) {
+      $startSlashRe = '/^(\.*(\\\|\/)*)+/';
+      $requestFileName = preg_replace ($startSlashRe, '', $requestFileName);
+
+      $dir = new Dir (ApplicationServerHelpers::PublicDir ());
+
+
+      $applicationAssestsPath = preg_replace ('/^(\/|\\\)+/', '', preg_replace ('/(\/|\\\)+$/', '',
+        HandleOutPut::path2re (ApplicationServerHelpers::AssetsPath ())
+      ));
+
+      $applicationAssestsPathRe = '/^\/?'.$applicationAssestsPath.'\/(.*)$/i';
+
+      $staticFilesPath = 'static';
+
+      if (isset (self::$config ['static'])
+        && is_array (self::$config ['static'])
+        && isset (self::$config ['static']['path'])
+        && is_string (self::$config ['static']['path'])) {
+        $staticFilesPath = self::$config ['static']['path'];
+      }
+
+      $requestFileNameAlternatePaths = [
+        join ('/', [$requestFileName]),
+        join ('.', [$requestFileName, 'php']),
+        join ('.', [$requestFileName, 'html']),
+        join ('/', [$staticFilesPath, $requestFileName]),
+        join ('/', [$staticFilesPath, join ('.', [$requestFileName, 'php'])]),
+        join ('/', [$staticFilesPath, join ('.', [$requestFileName, 'html'])])
+      ];
+
+      foreach ($requestFileNameAlternatePaths as $requestFileNameAlternatePath) {
+        if ($dir->contains ($requestFileNameAlternatePath)) {
+          return $dir->abs ($requestFileNameAlternatePath);
+        } elseif (@preg_match ($applicationAssestsPathRe, $requestFileNameAlternatePath, $match)) {
+          $assets = new Dir (ApplicationServerHelpers::AssetsDir ());
+          $filePath = isset ($match [1]) ? $match [1] : $match [0];
+
+          if ($assets->contains ($filePath)) {
+            return $assets->abs ($filePath);
+          }
+        }
+      }
+    }
+
+    protected function getShutDownHandler () {
+      $handler = (function () {
+        /**
+         * @var requestFileName
+         * - The requested file name
+         * - ?inside the public directory
+         */
+        $requestFileName = $_SERVER ['REQUEST_URI'];
+
+        if (RouteDatas::RouteExists ($requestFileName)) {
+        }
+      });
+
+      return Closure::bind ($handler, $this, static::class);
     }
   }}
 }

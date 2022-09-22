@@ -65,6 +65,11 @@ namespace Sammy\Packs\Samils\ApplicationServer {
     use Configure\Path;
 
     /**
+     * @var array config
+     */
+    private static $config;
+
+    /**
      * @method config
      * - Configure the application server file based
      * - on the 'application-server' file inside the
@@ -98,7 +103,15 @@ namespace Sammy\Packs\Samils\ApplicationServer {
      * - Acording to the type of the configure file
      * - Try getting the content as an array
      */
-    private function getConfigureFileDatas (Dir $dir) {
+    public function getConfigureFileDatas (Dir $dir = null) {
+      /**
+       * verify if there is already a config data
+       * object in order returning it
+       */
+      if (self::$config) {
+        return self::$config;
+      }
+
       # FileName: The application
       # server config file name
       $f = 'application-server';
@@ -117,14 +130,14 @@ namespace Sammy\Packs\Samils\ApplicationServer {
       }
 
       if ($ext === '.json') {
-        return json_decode (file_get_contents ($file));
+        return self::$config = json_decode (file_get_contents ($file));
       } elseif ($ext === '.php') {
-        return requires ($file);
+        return self::$config = requires ($file);
       } elseif (in_array ($ext, ['.yaml', '.yml'])) {
         $yaml = requires ('yaml-lite');
 
         if (is_object ($yaml)) {
-          return $yaml->parse_yaml_file ($file);
+          return self::$config = $yaml->parse_yaml_file ($file);
         }
       }
     }

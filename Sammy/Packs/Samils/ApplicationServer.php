@@ -58,7 +58,8 @@ namespace Sammy\Packs\Samils {
    * and boot it by using the ils directory boot.
    * -
    */
-  class ApplicationServer extends ApplicationServer\Base {
+  class ApplicationServer {
+    use ApplicationServer\Base;
     /**
      * @version 1.0
      *
@@ -84,6 +85,8 @@ namespace Sammy\Packs\Samils {
 
       $publicDir = new Dir (Helpers::PublicDir ());
       $configDir = new Dir (Helpers::ConfigDir ());
+
+      $applicationServer->getConfigureFileDatas ($configDir);
       /**
        * @method server
        * @module application-server
