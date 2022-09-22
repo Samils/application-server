@@ -4,6 +4,7 @@
 	"description": "A package configurator for web applications",
   "type": "library",
 	"license": "MIT",
+  "minimum-stability": "dev",
 	"keywords": [
 		"samils",
     "application",
