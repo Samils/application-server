@@ -86,17 +86,31 @@ namespace Sammy\Packs\Samils {
       $publicDir = new Dir (Helpers::PublicDir ());
       $configDir = new Dir (Helpers::ConfigDir ());
 
-      $applicationServer->getConfigureFileDatas ($configDir);
-      /**
-       * @method server
-       * @module application-server
-       * - start serving the public directory
-       * - in order including a requested file
-       * - from the url
-       */
-      $applicationServer->serve ($publicDir);
+      $applicationServerConfig = $applicationServer->getConfigureFileDatas ($configDir);
 
-      $applicationServer->configureServerFluxState ($configDir);
+      self::$props = array_merge (self::$props, $applicationServerConfig);
+
+      $flux = self::getProperty ('application_server_flux');
+
+      if (!(is_array ($flux) && $flux)) {
+        return;
+      }
+
+      $fluxMethodNames = [
+        'static' => 'staticRouteServe',
+        'applicationFlux' => 'configureServerFluxState'
+      ];
+
+      foreach ($flux as $key) {
+        if (is_string ($key) && isset ($fluxMethodNames [$key])) {
+          $fluxMethodName = trim ($fluxMethodNames [$key]);
+
+          call_user_func_array ([$applicationServer, $fluxMethodName], [[
+            'configDir' => $configDir,
+            'publicDir' => $publicDir
+          ]]);
+        }
+      }
     }
   }}
 }

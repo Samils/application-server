@@ -301,21 +301,21 @@ namespace Sammy\Packs\Samils\ApplicationServerHelpers {
      * @keywords Function Keywords
      */
     public static function conf ($config = null) {
-      static $serverConf = array ();
+      static $serverConfigData = [];
 
       if (is_string ($config)) {
-        $default = func_num_args () > 1 ? func_get_arg(1) : null;
-        $config = strtolower($config);
-        return !isset($serverConf [ $config ]) ? $default : (
-          $serverConf [ strtolower( $config ) ]
-        );
+        $defaultConfigPropValue = func_num_args () > 1 ? func_get_arg (1) : null;
+        $config = strtolower ($config);
+        return !isset ($serverConfigData [$config]) ? $defaultConfigPropValue : $serverConfigData [strtolower ($config)];
       }
 
-      if ( is_array ($config) ) {
-        $serverConf = array_merge ($serverConf, $config);
+      if (is_array ($config)) {
+        $serverConfigData = array_merge ($serverConfigData, $config);
       }
 
-      if (is_null($config)) return $serverConf;
+      if (is_null ($config)) {
+        return $serverConfigData;
+      }
     }
   }}
 }

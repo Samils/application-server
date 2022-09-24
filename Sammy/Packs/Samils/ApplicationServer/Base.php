@@ -37,6 +37,7 @@ namespace Sammy\Packs\Samils\ApplicationServer {
   use FileSystem\Folder as Dir;
   use Samils\Handler\HandleOutPut;
   use Sammy\Packs\Sami\RouteDatas;
+  use Sammy\Packs\Samils\KlassProps;
   use Sammy\Packs\Samils\ApplicationStorage;
   use Sammy\Packs\Samils\ApplicationServerHelpers;
   /**
@@ -67,6 +68,24 @@ namespace Sammy\Packs\Samils\ApplicationServer {
   trait Base {
     use FileType;
     use Configure;
+    use KlassProps;
+
+    /**
+     * @var array class global properties
+     */
+    private static $props = [
+      'application_server_flux' => [
+        /**
+         * @method server
+         * @module application-server
+         * - start serving the public directory
+         * - in order including a requested file
+         * - from the url
+         */
+        'static',
+        'applicationFlux'
+      ]
+    ];
 
     /**
      * @var public
@@ -76,10 +95,12 @@ namespace Sammy\Packs\Samils\ApplicationServer {
      */
     private $public;
 
-    public function serve (Dir $dir) {
+    public function staticRouteServe (array $props = []) {
       if (!isset ($_SERVER ['REQUEST_URI'])) {
         return 0;
       }
+
+      $dir = $props ['publicDir'];
 
       ApplicationStorage::on ('ShutDown', $this->getShutDownHandler ());
 
