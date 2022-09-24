@@ -66,7 +66,7 @@ namespace Sammy\Packs\Samils\ApplicationServer\LiveConfigure {
    * when trying to run the current command by the cli
    * API.
    */
-  if (!class_exists('Samils\Application\Server\LiveConfigure\Supper')){
+  if (!class_exists ('Samils\Application\Server\LiveConfigure\Supper')) {
   /**
    * @class Supper
    * Base internal class for the
@@ -152,7 +152,7 @@ namespace Sammy\Packs\Samils\ApplicationServer\LiveConfigure {
         #
         # Replacing supported chars (by live configure)
         # such as space and - by empty or _ (underscore).
-        $k = preg_replace('/\s+/', '',
+        $k = preg_replace ('/\s+/', '',
           # Before replacing spaces, it'll
           # have to replace whole - chars
           # by underscore chars in order

@@ -80,16 +80,14 @@ namespace Sammy\Packs\Samils\ApplicationServer {
      * -- json
      * -- php
      */
-    public function configureServerFluxState (Dir $confDir) {
-      $confDatas = $this->getConfigureFileDatas ( $confDir );
+    public function configureServerFluxState (array $props) {
+      ApplicationServerHelpers::conf (self::$props);
 
-      ApplicationServerHelpers::conf ($confDatas);
-
-      if (!is_array ($confDatas)) {
+      if (!(is_array (self::$props) && self::$props)) {
         return NoConfigFileError::Handle (debug_backtrace ());
       }
 
-      self::ConfigureApplicationPaths ($confDatas);
+      self::ConfigureApplicationPaths (self::$props);
       self::configureApplicationFlux ();
 
       ApplicationServerHelpers::conf ([
@@ -143,7 +141,7 @@ namespace Sammy\Packs\Samils\ApplicationServer {
     }
 
     public static function configureApplicationORM () {
-      $confDatas = ApplicationServerHelpers::conf ();
+      $confDatas = self::$props;
 
       if (!(isset ($confDatas ['application_orm'])
         && is_string ($confDatas ['application_orm'])
@@ -151,8 +149,8 @@ namespace Sammy\Packs\Samils\ApplicationServer {
         exit ('<h1>Error, no ORM set</h1><br />');
       }
 
-      if (!isset($confDatas ['application_orm_config'])) {
-        $confDatas['application_orm_config'] = [
+      if (!isset ($confDatas ['application_orm_config'])) {
+        $confDatas ['application_orm_config'] = [
           'migrations_location' => 'db/migrations'
         ];
       }
@@ -161,13 +159,12 @@ namespace Sammy\Packs\Samils\ApplicationServer {
         ['config' => $confDatas ['application_orm_config']]
       );
 
-
       $Orm = requires ($confDatas ['application_orm']);
 
       $orm = $Orm ($ormProps);
 
       if (is_object ($orm)) {
-        $orm->BaseConfig ();
+        $orm->baseConnect ();
       } else {
         exit ('BAD, ORM NOT SET');
       }
@@ -176,20 +173,20 @@ namespace Sammy\Packs\Samils\ApplicationServer {
     public static function configureApplicationViewEngine () {
       $confDatas = ApplicationServerHelpers::conf ();
 
-      $viewEngineManager = isset ($confDatas ['view engine manager']) ? (
-        $confDatas ['view engine manager']
+      $viewEngineManager = isset ($confDatas ['view_engine_manager']) ? (
+        $confDatas ['view_engine_manager']
       ) : '\\php\\view';
 
-      $viewEngineScripts = isset($confDatas['view engine scripts']) ? (
-        $confDatas['view engine scripts']
+      $viewEngineScripts = isset($confDatas ['view_engine_scripts']) ? (
+        $confDatas['view_engine_scripts']
       ) : [];
 
       $vem = requires ( $viewEngineManager );
 
       if (method_exists ($vem, 'start')) {
         return $vem->start (
-          isset ($confDatas ['view engine datas']) ? (
-            $confDatas ['view engine datas']
+          isset ($confDatas ['view_engine_datas']) ? (
+            $confDatas ['view_engine_datas']
           ) : []
         );
       } else {
@@ -200,14 +197,10 @@ namespace Sammy\Packs\Samils\ApplicationServer {
     public static function configureApplicationFlux () {
       $confDatas = ApplicationServerHelpers::conf ();
 
-      #echo '<pre>';
-      #print_r($confDatas);
-      #exit ('');
-
       $applicationFluxSet = ( boolean ) (
-        isset ($confDatas['application_flux']) && (
-          is_string ($confDatas['application_flux']) ||
-          is_array ($confDatas['application_flux'])
+        isset ($confDatas ['application_flux']) && (
+          is_string ($confDatas ['application_flux']) ||
+          is_array ($confDatas ['application_flux'])
         )
       );
 
@@ -221,16 +214,15 @@ namespace Sammy\Packs\Samils\ApplicationServer {
         if (is_array ($confDatas ['application_flux'])) {
           $appFlux = $confDatas ['application_flux'];
         } else {
-          $appFlux = preg_split ('/\s*/',
-            $confDatas ['application_flux']
-          );
+          $appFlux = preg_split ('/\s*/', $confDatas ['application_flux']);
         }
 
         $flux = array ();
 
         foreach ( $appFlux as $f ) {
-          if ( empty ($f) )
-              continue;
+          if (empty ($f)) {
+            continue;
+          }
 
           if (in_array (strtolower ($f), ['m', 'v', 'c'])) {
             /**
