@@ -109,7 +109,7 @@ namespace Sammy\Packs\Samils\ApplicationServer {
        * - The requested file name
        * - ?inside the public directory
        */
-      $requestFileName = $_SERVER ['REQUEST_URI'];
+      $requestFileName = preg_replace ('/(\?(.*))$/', '', $_SERVER ['REQUEST_URI']);
 
       $staticFilePath = $this->getStaticFilePath ($requestFileName);
 
