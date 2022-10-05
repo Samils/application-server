@@ -199,7 +199,8 @@ namespace Sammy\Packs\Samils\ApplicationServerHelpers {
       $const = '__config__';
       $ds = DIRECTORY_SEPARATOR;
       $configConst = 'Configure::ApplicationRoot';
-      return (defined($const) ? constant($const) : (
+
+      return (defined ($const) ? constant($const) : (
         class_exists ('Configure') &&
         !defined ($configConst) ? null : join ($ds, [
           Conf::ApplicationRoot, 'config'
