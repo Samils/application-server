@@ -246,9 +246,7 @@ namespace Sammy\Packs\Samils\ApplicationServerHelpers {
      * @keywords Function Keywords
      */
     public static function Env () {
-      return defined ('Configure::Environment') ? (
-        constant ('Configure::Environment')
-      ) : 'development';
+      return ($env = ENV::Get ('ILS_ENV')) ? $env : 'production';
     }
 
     /**
