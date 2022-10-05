@@ -80,16 +80,17 @@ namespace Sammy\Packs\Samils\ApplicationServerHelpers {
 
       $yamlLite = requires ('yaml-lite');
 
-      $databaseConfig = $yamlLite->parse_yaml_file (
-        self::DatabaseConfigFile ()
-      );
+      $databaseConfig = $yamlLite->parse_yaml_file (self::DatabaseConfigFile ());
 
-      $envDBConfig = self::GetEnvsDatabaseConfig (
-        $databaseConfig
-      );
+      $envDBConfig = self::GetEnvsDatabaseConfig ($databaseConfig);
+      $currentEnvDBConfig = [];
+
+      if (isset ($envDBConfig [self::Env ()])) {
+        $currentEnvDBConfig = $envDBConfig [self::Env ()];
+      }
 
       return array_merge ($initialProps, [
-        'database' => $envDBConfig [ self::Env () ],
+        'database' => $currentEnvDBConfig,
         'props' => $envDBConfig [ '@props' ]
       ]);
     }
