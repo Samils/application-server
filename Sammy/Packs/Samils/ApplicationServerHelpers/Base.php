@@ -33,6 +33,7 @@
 namespace Sammy\Packs\Samils\ApplicationServerHelpers {
   use FileSystem\Folder as Dir;
   use Configure as Conf;
+  use ENV;
   /**
    * Make sure the module base internal trait is not
    * declared in the php global scope defore creating
